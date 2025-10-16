@@ -25,6 +25,7 @@ pip install -r requirements.txt
 
 🏁 Запуск
 ```bash
+source venv/bin/activate  # или venv\Scripts\activate на Windows
 python src/main.py
 ```
 

@@ -2,7 +2,7 @@ import os
 import subprocess
 from logger import setup_logger
 
-logger = setup_logger()
+logger = setup_logger(name="actions", log_file="actions.log")
 
 
 def on_begin():

@@ -13,6 +13,7 @@ class VoiceRecognizer:
         self.q = queue.Queue()
         self.rec = vosk.KaldiRecognizer(self.model, 16000)
         self.logger = logger
+        self.processor = LiturgyFSM(logger)
 
     def _callback(self, indata, frames, time, status):
         if status:
@@ -30,6 +31,7 @@ class VoiceRecognizer:
                     text = result.get("text", "").lower()
                     if text.strip():
                         self.logger.info(f"Распознано: {text}")
+                        self.processor.process_phrase(text)
                         for phrase, action_name in TRIGGER_PHRASES.items():
                             if phrase in text:
                                 self.logger.info(f"Сработала фраза: '{phrase}' → действие: {action_name}")
