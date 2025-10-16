@@ -2,17 +2,23 @@ import vosk
 import sounddevice as sd
 import queue
 import json
-from config import TRIGGER_PHRASES
 from actions import execute_action
 
 
 class VoiceRecognizer:
-    def __init__(self, model_path, device_index, logger):
+    def __init__(self, model_path, device_index, logger, trigger_phrases=None):
         self.model = vosk.Model(model_path)
         self.device_index = device_index
         self.q = queue.Queue()
         self.rec = vosk.KaldiRecognizer(self.model, 16000)
         self.logger = logger
+        
+        # Используем переданные триггерные фразы или импортируем из config
+        if trigger_phrases is not None:
+            self.trigger_phrases = trigger_phrases
+        else:
+            from config import TRIGGER_PHRASES
+            self.trigger_phrases = TRIGGER_PHRASES
 
     def _callback(self, indata, frames, time, status):
         if status:
@@ -30,7 +36,7 @@ class VoiceRecognizer:
                     text = result.get("text", "").lower()
                     if text.strip():
                         self.logger.info(f"Распознано: {text}")
-                        for phrase, action_name in TRIGGER_PHRASES.items():
+                        for phrase, action_name in self.trigger_phrases.items():
                             if phrase in text:
                                 self.logger.info(f"Сработала фраза: '{phrase}' → действие: {action_name}")
                                 execute_action(action_name)
