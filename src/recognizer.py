@@ -2,12 +2,12 @@ import vosk
 import sounddevice as sd
 import queue
 import json
-from config import TRIGGER_PHRASES
-from actions import execute_action
+
+from src.liturgy_fsm import LiturgyFSM
 
 
 class VoiceRecognizer:
-    def __init__(self, model_path, device_index, logger):
+    def __init__(self, model_path, device_index, logger, trigger_phrases=None):
         self.model = vosk.Model(model_path)
         self.device_index = device_index
         self.q = queue.Queue()
@@ -32,14 +32,10 @@ class VoiceRecognizer:
                     if text.strip():
                         self.logger.info(f"Распознано: {text}")
                         self.processor.process_phrase(text)
-                        for phrase, action_name in TRIGGER_PHRASES.items():
-                            if phrase in text:
-                                self.logger.info(f"Сработала фраза: '{phrase}' → действие: {action_name}")
-                                execute_action(action_name)
-                                break
                 else:
                     result = json.loads(self.rec.PartialResult())
                     text = result.get("text", "").lower()
                     if text.strip():
                         self.logger.info(f"Распознано Partial: {text}")
+                        # todo? self.processor.process_phrase(text)
                   
