@@ -31,15 +31,14 @@ def main():
 
     logger.info(f"Выбрана служба: {service_type} с устройством: {device_name}")
 
-    
-    # Создаем и запускаем распознавание
-    recognizer = VoiceRecognizer(
-        model_path=PATH_TO_MODEL, 
-        device_index=device_index, 
-        logger=logger,
-        # todo trigger_phrases=trigger_phrases
-    )
-    recognizer.listen()
+    if service_type = "литургия":
+        # Создаем и запускаем распознавание
+        recognizer = VoiceRecognizer(
+            model_path=PATH_TO_MODEL, 
+            device_index=device_index, 
+            logger=logger,
+        )
+        recognizer.listen()
 
 
 if __name__ == "__main__":
