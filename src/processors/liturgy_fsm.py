@@ -72,7 +72,6 @@ class LiturgyFSM:
         return any(trigger.lower() in phrase for trigger in triggers)
     
     def _execute_transition(self, transition: StateTransition):
-        """Выполняет переход состояния"""
         old_state = self.current_state_name
         self.current_state_name = transition.next_state
 
