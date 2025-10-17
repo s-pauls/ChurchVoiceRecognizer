@@ -61,6 +61,10 @@ class LiturgyFSM:
         transition = self._find_transition(phrase_lower)
         if transition:
             self._execute_transition(transition)
+        else:
+            # Дополнительно проверяем, есть ли триггеры в тексте для любого состояния
+            # Это поможет восстановиться, если мы пропустили переход
+            # self._check_recovery_transitions(phrase_lower)
     
     def _find_transition(self, phrase: str) -> Optional[StateTransition]:
         state_transition = self.states_config.get(self.current_state_name)
@@ -70,6 +74,33 @@ class LiturgyFSM:
     
     def _phrase_matches_triggers(self, phrase: str, triggers: List[str]) -> bool:
         return any(trigger.lower() in phrase for trigger in triggers)
+    
+    def _check_recovery_transitions(self, phrase: str):
+        """Проверяет возможность восстановления состояния по ключевым фразам."""
+        # Ищем среди всех состояний те, чьи триггеры присутствуют в фразе
+        for state_name, state_transition in self.states_config.items():
+            if state_name != self.current_state_name:  # Не текущее состояние
+                if self._phrase_matches_triggers(phrase, state_transition.trigger_phrases):
+                    self.logger.info(f"Обнаружен переход восстановления: {self.current_state_name} → {state_name}")
+                    self._execute_transition_to_state(state_name, state_transition)
+                    break
+    
+    def _execute_transition_to_state(self, target_state: str, transition: StateTransition):
+        """Выполняет переход в конкретное состояние."""
+        old_state = self.current_state_name
+        self.current_state_name = target_state
+        
+        state_config = self.states_config.get(target_state)
+        if state_config:
+            self.current_state = state_config
+        
+        self.start_state_timer(target_state, transition)
+        
+        # Выполняем действие, если оно задано
+        if transition.action:
+            transition.action()
+        
+        print(f"🔄 Восстановление состояния: {old_state} → {target_state}")
     
     def _execute_transition(self, transition: StateTransition):
         old_state = self.current_state_name
@@ -103,11 +134,19 @@ class LiturgyFSM:
         """Возвращает конфигурацию блоков по умолчанию"""
         return {
             "START": StateTransition(
-                trigger_phrases=["слава тебе боже наш", "царю небесный", "приди", "и очисти", "крепкий", "помилуй нас"],
+                trigger_phrases=[
+                    "слава тебе боже наш", "царю небесный", "приди", 
+                    "и очисти", "крепкий", "помилуй нас", "слава тебе боже",
+                    "царю небесный утешителю"
+                ],
                 next_state="THIRD_HOUR_STARTED"
             ),
             "THIRD_HOUR_STARTED": StateTransition(
-                trigger_phrases=["отче наш", "имя твое", "царствие твое", "долги наш"],
+                trigger_phrases=[
+                    "отче наш", "имя твое", "царствие твое", "долги наши",
+                    "отче наш иже еси", "да святится имя", "да приидет царствие",
+                    "и остави нам долги"
+                ],
                 next_state="THIRD_HOUR_OTCHE_1",
                 action=self.action_altar_and_reader,
             ),
@@ -117,7 +156,11 @@ class LiturgyFSM:
                 action=self.action_reader_only
             ),
             "THIRD_HOUR_WAIT_2": StateTransition(
-                trigger_phrases=["отче наш", "имя твое", "царствие твое", "долги наш"],
+                trigger_phrases=[
+                    "отче наш", "имя твое", "царствие твое", "долги наши",
+                    "отче наш иже еси", "да святится имя", "да приидет царствие",
+                    "и остави нам долги"
+                ],
                 next_state="THIRD_HOUR_OTCHE_2",
                 action=self.action_altar_and_reader,
             ),
@@ -131,7 +174,11 @@ class LiturgyFSM:
                 next_state="SIXTH_HOUR_STARTED"
             ),
             "SIXTH_HOUR_STARTED": StateTransition(
-                trigger_phrases=["отче наш", "имя твое", "царствие твое", "долги наш"],
+                trigger_phrases=[
+                    "отче наш", "имя твое", "царствие твое", "долги наши",
+                    "отче наш иже еси", "да святится имя", "да приидет царствие",
+                    "и остави нам долги"
+                ],
                 next_state="SIXTH_HOUR_OTCHE",
                 action=self.action_altar_and_reader
             ),
