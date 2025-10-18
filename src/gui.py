@@ -14,25 +14,28 @@ class SettingsDialog:
         self.selected_device_name = None
         self.selected_service = None
         self.saved_device_name = saved_device_name
-        
+
         # Загружаем сохраненные настройки
         self.saved_settings = load_settings()
-        
+
         # Создаем главное окно
         self.root = tk.Toplevel(parent) if parent else tk.Tk()
         self.root.title("🎙️ Настройки службы")
-        self.root.geometry("450x340")
+        self.root.geometry("470x390")
         self.root.resizable(False, False)
-        
+
         # Центрируем окно
         self.center_window()
-        
+
+        # Настраиваем стили для увеличенного шрифта
+        self.setup_styles()
+
         # Делаем окно модальным
         self.root.transient(parent)
         self.root.grab_set()
-        
+
         self.setup_ui()
-        
+
     def center_window(self):
         """Центрирует окно на экране"""
         self.root.update_idletasks()
@@ -41,51 +44,63 @@ class SettingsDialog:
         pos_x = (self.root.winfo_screenwidth() // 2) - (width // 2)
         pos_y = (self.root.winfo_screenheight() // 2) - (height // 2)
         self.root.geometry(f"{width}x{height}+{pos_x}+{pos_y}")
-        
+
+    @staticmethod
+    def setup_styles():
+        """Настраивает стили для элементов интерфейса"""
+        style = ttk.Style()
+
+        # Настраиваем шрифты для различных элементов
+        style.configure('TLabelframe.Label', font=('Arial', 14))
+        style.configure('TButton', font=('Arial', 14))
+        style.configure('TRadiobutton', font=('Arial', 14))
+        style.configure('TCombobox', font=('Arial', 14))
+        style.configure('Accent.TButton', font=('Arial', 14))
+
     def setup_ui(self):
         """Создает элементы интерфейса"""
         # Заголовок
         title_frame = ttk.Frame(self.root)
         title_frame.pack(pady=10)
-        
+
         title_label = ttk.Label(
-            title_frame, 
-            text="⛪ Настройки системы распознавания речи",
+            title_frame,
+            text="⛪ Автоматическое управление микрофонами",
             font=("Arial", 14, "bold")
         )
         title_label.pack()
-        
+
         # Основной контейнер
         main_frame = ttk.Frame(self.root)
         main_frame.pack(padx=15, pady=15, fill="both", expand=True)
-        
+
         # Выбор типа службы
         service_frame = ttk.LabelFrame(main_frame, text="📜 Тип службы", padding=10)
         service_frame.pack(fill="x", pady=(0, 15))
-        
+
         # Устанавливаем сохраненный тип службы
         saved_service = "литургия"
         self.service_var = tk.StringVar(value=saved_service)
 
         ttk.Radiobutton(
-            service_frame, 
-            text="🕊️ Божественная Литургия",
+            service_frame,
+            text="🕊 Божественная Литургия",
             variable=self.service_var,
             value="литургия"
         ).pack(anchor="w", pady=2)
-        
+
         ttk.Radiobutton(
-            service_frame, 
-            text="🌟 Всенощное бдение", 
+            service_frame,
+            text="🌟 Всенощное бдение",
             variable=self.service_var,
             value="всенощная"
         ).pack(anchor="w", pady=2)
-        
+
         # Выбор аудио устройства
         device_frame = ttk.LabelFrame(main_frame, text="🎤 Микрофон", padding=10)
         device_frame.pack(fill="x", pady=(0, 15))
-        
-        ttk.Label(device_frame, text="Выберите устройство записи:").pack(anchor="w", pady=(0, 5))
+
+        ttk.Label(device_frame, text="Выберите устройство записи:", font=("Arial", 14)).pack(anchor="w", pady=(0, 5))
         
         self.device_var = tk.StringVar()
         self.device_combo = ttk.Combobox(
@@ -119,7 +134,7 @@ class SettingsDialog:
         
         ttk.Button(
             button_frame, 
-            text="✅ Запустить службу", 
+            text="✅ Запустить",
             command=self.ok,
             style="Accent.TButton"
         ).pack(side="right")
