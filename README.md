@@ -13,8 +13,7 @@
 
 ```bash
 git clone https://github.com/yourusername/voice_trigger.git
-cd src
-python -m venv venv
+python -m venv .venv
 source venv/bin/activate  # или venv\Scripts\activate на Windows
 pip install -r requirements.txt
 ```
