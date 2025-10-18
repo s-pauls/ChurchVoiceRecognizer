@@ -4,6 +4,16 @@ from logger import setup_logger
 
 logger = setup_logger(name="actions", log_file="actions.log")
 
+
+def action_altar_and_reader():
+    print("✅ Действие Алтарь + Чтец")
+
+def action_reader_only():
+    print("✅ Действие Только чтец")
+
+def action_switch_off_all_mics():
+    print("✅ Действие Выключить все микрофоны")
+
 def send_keys_to_obs(hotkey: str):
     try:
         vbs_path = os.path.abspath("sendKeysTo.vbs")

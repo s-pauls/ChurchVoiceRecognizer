@@ -5,7 +5,13 @@ from typing import List
 from processors.liturgy_fsm import LiturgyFSM
 from processors.vesper_processor import VesperProcessor
 from processors.simple_keyword_processor import SimpleKeywordProcessor
+from processors.base_processor import BaseProcessor
 
+
+def create_base_processor(logger):
+    """Создает процессор для литургии."""
+    processor = BaseProcessor(logger)
+    return processor.process_phrase
 
 def create_liturgy_processor(logger):
     """Создает процессор для литургии."""
@@ -27,6 +33,7 @@ def create_keyword_processor(logger, keywords: List[str]):
 
 # Предустановленные конфигурации
 SERVICE_PROCESSORS = {
+    "базовый": create_base_processor,
     "литургия": create_liturgy_processor,
     "вечерня": create_vesper_processor,
     "утреня": lambda logger: create_keyword_processor(

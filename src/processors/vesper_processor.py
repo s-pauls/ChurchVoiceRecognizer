@@ -6,7 +6,7 @@ class VesperProcessor:
         self.state = "waiting_start"
         self.psalm_count = 0
 
-    def process_phrase(self, text: str):
+    def process_phrase(self, text: str) -> bool:
         """Обрабатывает фразы вечерней службы."""
         text = text.lower()
 
@@ -28,6 +28,8 @@ class VesperProcessor:
             if "ныне отпущаеши" in text:
                 self.state = "service_end"
                 self.logger.info("✨ Завершение вечерней службы")
+
+        return False
 
     def reset(self):
         """Сбрасывает состояние процессора."""

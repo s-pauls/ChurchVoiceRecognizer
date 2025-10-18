@@ -8,7 +8,7 @@ class SimpleKeywordProcessor:
         self.keywords = [kw.lower() for kw in keywords]
         self.detected_count = {kw: 0 for kw in self.keywords}
 
-    def process_phrase(self, text: str):
+    def process_phrase(self, text: str) -> bool:
         """Обрабатывает фразу, ища в ней ключевые слова."""
         text_lower = text.lower()
 
@@ -16,6 +16,8 @@ class SimpleKeywordProcessor:
             if keyword in text_lower:
                 self.detected_count[keyword] += 1
                 self.logger.info(f"🔑 Обнаружено ключевое слово '{keyword}' (раз: {self.detected_count[keyword]})")
+
+        return False
 
     def get_statistics(self) -> Dict[str, int]:
         """Возвращает статистику обнаруженных ключевых слов."""

@@ -1,6 +1,7 @@
 import time
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Callable
+from src.actions import action_altar_and_reader, action_reader_only
 
 @dataclass
 class StateTransition:
@@ -19,12 +20,6 @@ class LiturgyFSM:
         
         # Инициализируем конфигурацию блоков
         self.states_config = states_config if states_config else self._get_default_config()
-
-    def action_altar_and_reader(self):
-        print("✅ Действие Алтарь + Чтец")
-
-    def action_reader_only(self):
-        print("✅ Действие Только чтец")
 
     def check_timeout(self):
         """Проверяет истечение таймаута текущего блока"""
@@ -50,22 +45,26 @@ class LiturgyFSM:
         self.state_start_time = None
         self.current_state = None
 
-    def process_phrase(self, phrase: str):
+    def process_phrase(self, phrase: str) -> bool:
         phrase_lower = phrase.lower()
         
         # Проверяем таймаут
         if self.check_timeout():
-            return
+            return False
             
         # Ищем подходящий переход для текущего состояния
         transition = self._find_transition(phrase_lower)
         if transition:
             self._execute_transition(transition)
+            return True
         else:
+            pass
             # Дополнительно проверяем, есть ли триггеры в тексте для любого состояния
             # Это поможет восстановиться, если мы пропустили переход
             # self._check_recovery_transitions(phrase_lower)
-    
+
+        return False
+
     def _find_transition(self, phrase: str) -> Optional[StateTransition]:
         state_transition = self.states_config.get(self.current_state_name)
         if state_transition and self._phrase_matches_triggers(phrase, state_transition.trigger_phrases):
@@ -148,12 +147,12 @@ class LiturgyFSM:
                     "и остави нам долги"
                 ],
                 next_state="THIRD_HOUR_OTCHE_1",
-                action=self.action_altar_and_reader,
+                action=action_altar_and_reader,
             ),
             "THIRD_HOUR_OTCHE_1": StateTransition(
                 trigger_phrases=["господи помилуй"],
                 next_state="THIRD_HOUR_WAIT_2",
-                action=self.action_reader_only
+                action=action_reader_only
             ),
             "THIRD_HOUR_WAIT_2": StateTransition(
                 trigger_phrases=[
@@ -162,12 +161,12 @@ class LiturgyFSM:
                     "и остави нам долги"
                 ],
                 next_state="THIRD_HOUR_OTCHE_2",
-                action=self.action_altar_and_reader,
+                action=action_altar_and_reader,
             ),
             "THIRD_HOUR_OTCHE_2": StateTransition(
                 trigger_phrases=["господи помилуй"],
                 next_state="THIRD_HOUR_END",
-                action=self.action_reader_only
+                action=action_reader_only
             ),
             "THIRD_HOUR_END": StateTransition(
                 trigger_phrases=["слава тебе боже наш", "царю небесный", "приди", "и очисти", "крепкий", "помилуй нас"],
@@ -180,11 +179,11 @@ class LiturgyFSM:
                     "и остави нам долги"
                 ],
                 next_state="SIXTH_HOUR_OTCHE",
-                action=self.action_altar_and_reader
+                action=action_altar_and_reader
             ),
             "SIXTH_HOUR_OTCHE": StateTransition(
                 trigger_phrases=["господи помилуй"],
                 next_state="SIXTH_HOUR_END",
-                action=self.action_reader_only
+                action=action_reader_only
             )
         }

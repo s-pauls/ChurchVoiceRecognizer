@@ -6,10 +6,12 @@ import time
 from typing import Callable, Optional
 from collections import deque
 
+import src.voice_recogniz_management as vrm
+
 
 class VoiceRecognizer:
     def __init__(self, model_path, device_index, logger, 
-                 phrase_processor: Optional[Callable[[str], None]] = None,
+                 phrase_processor: Optional[Callable[[str], bool]] = None,
                  buffer_duration: int = 30,
                  min_phrase_length: int = 3):
         """
@@ -48,7 +50,7 @@ class VoiceRecognizer:
         with sd.RawInputStream(samplerate=16000, blocksize=4000, dtype='int16',
                                channels=1, device=self.device_index, callback=self._callback):
             self.logger.info("Начато прослушивание службы")
-            while True:
+            while vrm.RunningVoiceRecognizer:
                 data = self.q.get()
                 current_time = time.time()
                 
@@ -79,6 +81,7 @@ class VoiceRecognizer:
                 
                 # Периодическая очистка буфера
                 self._cleanup_buffer(current_time)
+            self.logger.info("Завершено прослушивание")
     
     def _add_to_buffer(self, text: str, timestamp: float, is_partial: bool = False):
         """Добавляет текст в буфер с временной меткой."""

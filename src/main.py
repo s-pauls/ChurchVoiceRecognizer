@@ -1,3 +1,4 @@
+import src.voice_recogniz_management as vrm
 from config import PATH_TO_MODEL
 from recognizer import VoiceRecognizer
 from logger import setup_logger
@@ -32,26 +33,34 @@ def main():
 
     logger.info(f"Выбрана служба: {service_type} с устройством: {device_name}")
 
+    base_processor_def = SERVICE_PROCESSORS.get("базовый")
+
+    if base_processor_def:
+        base_processor = base_processor_def(logger)
+        logger.info("Инициализирован базовый процессор")
+
     # Создаем обработчик фраз в зависимости от типа службы
     processor_factory = SERVICE_PROCESSORS.get(service_type.lower())
     
     if processor_factory:
         phrase_processor = processor_factory(logger)
         logger.info(f"Инициализирован процессор для службы: {service_type}")
-    else:
-        # Обработчик по умолчанию для неизвестных типов служб
-        def default_processor(text: str):
-            logger.info(f"Обработка фразы (по умолчанию): {text}")
-        phrase_processor = default_processor
-        logger.info(f"Используется обработчик по умолчанию для службы: {service_type}")
-        logger.info(f"Доступные типы служб: {list(SERVICE_PROCESSORS.keys())}")
+
+    def combined_processor(text: str) -> bool:
+        if base_processor(text):
+            return True
+
+        if not vrm.VoiceRecognizerOnPause:
+            return phrase_processor(text)
+
+        return False
 
     # Создаем и запускаем распознавание
     recognizer = VoiceRecognizer(
         model_path=PATH_TO_MODEL, 
         device_index=device_index, 
         logger=logger,
-        phrase_processor=phrase_processor
+        phrase_processor=combined_processor
     )
     recognizer.listen()
 
