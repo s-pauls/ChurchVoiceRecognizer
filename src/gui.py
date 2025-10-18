@@ -20,12 +20,12 @@ class SettingsDialog:
 
         # Создаем главное окно
         self.root = tk.Toplevel(parent) if parent else tk.Tk()
+        # Hide window during setup
+        self.root.withdraw()
+
         self.root.title("🎙️ Настройки службы")
         self.root.geometry("470x390")
         self.root.resizable(False, False)
-
-        # Центрируем окно
-        self.center_window()
 
         # Настраиваем стили для увеличенного шрифта
         self.setup_styles()
@@ -35,6 +35,12 @@ class SettingsDialog:
         self.root.grab_set()
 
         self.setup_ui()
+
+        # Центрируем окно
+        self.center_window()
+
+        # Show window when ready
+        self.root.deiconify()
 
     def center_window(self):
         """Центрирует окно на экране"""
