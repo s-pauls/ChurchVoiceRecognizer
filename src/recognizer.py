@@ -60,7 +60,7 @@ class VoiceRecognizer:
                     text = result.get("text", "").lower().strip()
                     
                     if text and len(text) >= self.min_phrase_length:
-                        self.logger.info(f"Распознано полное: {text}")
+                        # self.logger.info(f"Распознано полное: {text}")
                         self._add_to_buffer(text, current_time)
                         self._process_buffer()
                         self.last_partial_text = ""  # Сброс частичного текста
@@ -72,7 +72,7 @@ class VoiceRecognizer:
                     if partial_text and len(partial_text) >= self.min_phrase_length:
                         # Обрабатываем только если частичный текст существенно изменился
                         if self._is_significant_change(partial_text):
-                            self.logger.info(f"Частичное распознавание: {partial_text}")
+                            # self.logger.info(f"Частичное распознавание: {partial_text}")
                             self.last_partial_text = partial_text
                             
                             # Добавляем частичный текст в буфер для анализа длинных фраз
@@ -97,6 +97,10 @@ class VoiceRecognizer:
         cutoff_time = current_time - self.buffer_duration
         while self.text_buffer and self.text_buffer[0]['timestamp'] < cutoff_time:
             self.text_buffer.popleft()
+
+    def _clear_buffer(self):
+        """Удаляет все записи из буфера."""
+        self.text_buffer.clear()
     
     def _is_significant_change(self, new_text: str) -> bool:
         """Проверяет, существенно ли изменился частичный текст."""
@@ -134,13 +138,18 @@ class VoiceRecognizer:
         if recent_texts:
             # Объединяем тексты и обрабатываем
             combined_text = ' '.join(recent_texts)
-            self._process_recognized_text(combined_text)
+            if self._process_recognized_text(combined_text):
+                # очистка ничего не дает, так как в полной или частичной фразе содержутся фразы и они восстанавливаются!
+                self._clear_buffer()
+                return
             
             # Также обрабатываем последний полный текст отдельно
             last_full_texts = [entry['text'] for entry in self.text_buffer 
                              if not entry['is_partial']]
             if last_full_texts:
-                self._process_recognized_text(last_full_texts[-1])
+                if self._process_recognized_text(last_full_texts[-1]):
+                    # очистка ничего не дает, так как в полной или частичной фразе содержутся фразы и они восстанавливаются!
+                    self._clear_buffer()
     
     def _is_duplicate_of_recent_full(self, partial_text: str) -> bool:
         """Проверяет, не является ли частичный текст дублем недавнего полного результата."""
@@ -151,24 +160,14 @@ class VoiceRecognizer:
                 break  # Проверяем только последний полный результат
         return False
     
-    def _process_recognized_text(self, text: str):
+    def _process_recognized_text(self, text: str) -> bool:
         """Обрабатывает распознанный текст через callback-функцию."""
         if self.phrase_processor:
             try:
-                self.phrase_processor(text)
+                return self.phrase_processor(text)
             except Exception as e:
                 self.logger.error(f"Ошибка при обработке фразы '{text}': {e}")
         else:
             self.logger.warning(f"Нет обработчика для фразы: {text}")
-    
-    def get_recent_text(self, duration: int = 15) -> str:
-        """Возвращает недавно распознанный текст за указанное время."""
-        current_time = time.time()
-        cutoff_time = current_time - duration
-        
-        recent_texts = []
-        for entry in self.text_buffer:
-            if entry['timestamp'] >= cutoff_time and not entry['is_partial']:
-                recent_texts.append(entry['text'])
-        
-        return ' '.join(recent_texts)
+        return False
+

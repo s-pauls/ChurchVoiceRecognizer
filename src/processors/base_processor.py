@@ -2,11 +2,11 @@ import src.voice_recogniz_management as vrm
 from src.actions import action_switch_off_all_mics
 
 PRIORITY_COMMANDS = {
-    "стоп": "handle_stop",
-    "выключи микрофоны": "handle_mic_off",
-    "выключи компьютер": "handle_shutdown",
-    "пауза": "handle_pause",
-    "продолжай": "handle_resume"
+    "handle_stop": ["стоп", "ангела хранителя", "ангела-хранителя"],
+    "handle_mic_off": ["выключи микрофоны"],
+    "handle_shutdown": ["выключи компьютер"],
+    "handle_pause": ["пауза"],
+    "handle_resume": ["продолжай"]
 }
 
 
@@ -18,9 +18,9 @@ class BaseProcessor:
     def process_phrase(self, text: str) -> bool:
         """Обрабатывает базовые команды."""
         phrase = text.strip().lower()
-        for command, handler_name in PRIORITY_COMMANDS.items():
-            if command in phrase:
-                self.logger.info(f"Обработка приоритетной команды: {command}")
+        for handler_name, commands,  in PRIORITY_COMMANDS.items():
+            if any(command in phrase for command in commands):
+                self.logger.info(f"Обработка приоритетной команды: {handler_name}")
                 handler = getattr(self, handler_name, None)
                 if handler:
                     handler()
