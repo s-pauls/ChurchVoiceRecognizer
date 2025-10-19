@@ -1,6 +1,16 @@
 import time
 from typing import Dict, List, Optional
+from enum import Enum
 from src.processors.liturgy_fsm_config import get_default_config, StateTransition
+
+
+class StateExecutionPhase(Enum):
+    """Фазы выполнения состояния"""
+    READY = "ready"  # Готов к обработке фраз
+    ON_BEGIN_DELAY = "on_begin_delay"  # Ожидание onBeginDelaySeconds
+    ON_BEGIN_ACTION = "on_begin_action"  # Выполнение onBeginAction
+    SLEEP_TIMEOUT = "sleep_timeout"  # Ожидание sleepTimeout
+    AFTER_SLEEP_ACTION = "after_sleep_action"  # Выполнение afterSleepAction
 
 
 class LiturgyFSM:
@@ -10,30 +20,18 @@ class LiturgyFSM:
         self.state_start_time = None
         self.logger = logger
         
+        # Фаза выполнения текущего состояния
+        self.execution_phase = StateExecutionPhase.READY
+        self.phase_start_time = None
+        
         # Инициализируем конфигурацию блоков
         self.states_config = states_config if states_config else get_default_config()
-
-    def wait_timeout(self) -> bool:
-        """Проверяет истечение таймаута текущего блока"""
-        if not self.state_start_time or not self.current_state:
-            return False
-            
-        state_config = self.states_config.get(self.current_state_name)
-        if not state_config:
-            return False
-
-        elapsed_time = time.time() - self.state_start_time
-        if state_config.onBeginDelaySeconds and elapsed_time < state_config.onBeginDelaySeconds:
-            self.logger.info("⏳ Ожидание таймаута блока "f"'{self.current_state_name}' "
-                             f"({int(elapsed_time)}/{state_config.onBeginDelaySeconds}с)")
-            return True
-        return False
 
     def process_phrase(self, phrase: str) -> bool:
         phrase_lower = phrase.lower()
         
-        # Проверяем таймаут
-        if self.wait_timeout():
+        # Проверяем, выполняется ли состояние (задержки/действия)
+        if self._execute_state_phases_if_not_busy():
             return False
             
         # Ищем подходящий переход для текущего состояния
@@ -48,6 +46,82 @@ class LiturgyFSM:
             # self._check_recovery_transitions(phrase_lower)
 
         return False
+
+    def _execute_state_phases_if_not_busy(self) -> bool:
+        """Проверяет, выполняется ли состояние (задержки или действия)"""
+        if self.execution_phase == StateExecutionPhase.READY:
+            return False
+            
+        state_config = self.states_config.get(self.current_state_name)
+        if not state_config or not self.phase_start_time:
+            return False
+
+        current_time = time.time()
+        elapsed_time = current_time - self.phase_start_time
+
+        # Проверяем текущую фазу
+        if self.execution_phase == StateExecutionPhase.ON_BEGIN_DELAY:
+            if state_config.onBeginDelaySeconds and elapsed_time < state_config.onBeginDelaySeconds:
+                self.logger.info(f"⏳ onBeginDelay для '{self.current_state_name}' "
+                               f"({int(elapsed_time)}/{state_config.onBeginDelaySeconds}с)")
+                return True
+            else:
+                # Переходим к выполнению onBeginAction
+                self._execute_on_begin_action()
+                return True
+                
+        elif self.execution_phase == StateExecutionPhase.SLEEP_TIMEOUT:
+            if state_config.sleepTimeout and elapsed_time < state_config.sleepTimeout:
+                self.logger.info(f"⏳ sleepTimeout для '{self.current_state_name}' "
+                               f"({int(elapsed_time)}/{state_config.sleepTimeout}с)")
+                return True
+            else:
+                # Переходим к выполнению afterSleepAction
+                self._execute_after_sleep_action()
+                return True
+                
+        return False
+
+    def _execute_on_begin_action(self):
+        """Выполняет onBeginAction и переходит к следующей фазе"""
+        state_config = self.states_config.get(self.current_state_name)
+        if not state_config:
+            self._set_phase(StateExecutionPhase.READY)
+            return
+            
+        self.execution_phase = StateExecutionPhase.ON_BEGIN_ACTION
+        
+        if state_config.onBeginAction:
+            self.logger.info(f"⚙️ Выполнение onBeginAction для '{self.current_state_name}'")
+            state_config.onBeginAction()
+        
+        # Переходим к sleepTimeout или завершаем
+        if state_config.sleepTimeout and state_config.sleepTimeout > 0:
+            self._set_phase(StateExecutionPhase.SLEEP_TIMEOUT)
+        else:
+            self._execute_after_sleep_action()
+
+    def _execute_after_sleep_action(self):
+        """Выполняет afterSleepAction и завершает выполнение состояния"""
+        state_config = self.states_config.get(self.current_state_name)
+        if not state_config:
+            self._set_phase(StateExecutionPhase.READY)
+            return
+            
+        self.execution_phase = StateExecutionPhase.AFTER_SLEEP_ACTION
+        
+        if state_config.afterSleepAction:
+            self.logger.info(f"⚙️ Выполнение afterSleepAction для '{self.current_state_name}'")
+            state_config.afterSleepAction()
+        
+        # Завершаем выполнение состояния
+        self._set_phase(StateExecutionPhase.READY)
+
+    def _set_phase(self, phase: StateExecutionPhase):
+        """Устанавливает новую фазу выполнения"""
+        self.execution_phase = phase
+        self.phase_start_time = time.time() if phase != StateExecutionPhase.READY else None
+
 
     def _find_transition(self, phrase: str) -> Optional[StateTransition, str]:
         state_transition = self.states_config.get(self.current_state_name)
@@ -71,25 +145,29 @@ class LiturgyFSM:
 
         self.logger.info(f"▶️ Переход: {old_state} → {self.current_state_name}")
 
-        # Выполняем действие, если оно задано
-        if transition.onBeginAction:
-            self.logger.info(f"⚙️ Выполнение действия состояния '{self.current_state_name}'")
-            transition.onBeginAction()
+        # Запускаем последовательность выполнения нового состояния
+        self._start_state_execution()
 
-        if transition.afterSleepAction:
-            self.logger.info(f"⚙️ Выполнение действия состояния '{self.current_state_name}'")
-            transition.afterSleepAction()
+    def _start_state_execution(self):
+        """Запускает последовательность выполнения состояния"""
+        state_config = self.states_config.get(self.current_state_name)
+        if not state_config:
+            self._set_phase(StateExecutionPhase.READY)
+            return
 
-        self.start_state_timer(self.current_state_name, state_config)
-    
-    def start_state_timer(self, state_name: str, state: StateTransition):
-        if state and state.onBeginDelaySeconds and state.onBeginDelaySeconds > 0:
-            self.state_start_time = time.time()
-            self.logger.info(f"🕐 Запущен таймер для состояния '{state_name}' ({state.onBeginDelaySeconds}с)")
+        # Проверяем, есть ли onBeginDelaySeconds
+        if state_config.onBeginDelaySeconds and state_config.onBeginDelaySeconds > 0:
+            self.logger.info(f"🕐 Запущен onBeginDelay для '{self.current_state_name}' ({state_config.onBeginDelaySeconds}с)")
+            self._set_phase(StateExecutionPhase.ON_BEGIN_DELAY)
+        else:
+            # Если задержки нет, сразу выполняем onBeginAction
+            self._execute_on_begin_action()
 
     def reset(self):
         """Сбрасывает FSM в начальное состояние"""
         self.current_state_name = "START"
         self.current_state = None
         self.state_start_time = None
+        self.execution_phase = StateExecutionPhase.READY
+        self.phase_start_time = None
         print("🔄 FSM сброшен в начальное состояние")
