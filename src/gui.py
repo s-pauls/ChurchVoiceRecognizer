@@ -17,6 +17,11 @@ class SettingsDialog:
 
         # Загружаем сохраненные настройки
         self.saved_settings = load_settings()
+        
+        # Инициализируем таймер автозапуска
+        self.countdown_seconds = 5
+        self.timer_id = None
+        self.start_button = None
 
         # Создаем главное окно
         self.root = tk.Toplevel(parent) if parent else tk.Tk()
@@ -41,6 +46,9 @@ class SettingsDialog:
 
         # Show window when ready
         self.root.deiconify()
+        
+        # Запускаем таймер автозапуска
+        self.start_countdown()
 
     def center_window(self):
         """Центрирует окно на экране"""
@@ -138,12 +146,13 @@ class SettingsDialog:
             command=self.cancel
         ).pack(side="right", padx=(10, 0))
         
-        ttk.Button(
+        self.start_button = ttk.Button(
             button_frame, 
-            text="✅ Запустить",
+            text=f"✅ Запустить ({self.countdown_seconds})",
             command=self.ok,
             style="Accent.TButton"
-        ).pack(side="right")
+        )
+        self.start_button.pack(side="right")
         
         # Привязываем Enter к OK
         self.root.bind('<Return>', lambda e: self.ok())
@@ -174,8 +183,35 @@ class SettingsDialog:
         except Exception as e:
             messagebox.showerror("Ошибка", f"Не удалось загрузить аудио устройства:\n{e}")
             
+    def start_countdown(self):
+        """Запускает таймер обратного отсчета"""
+        self.update_countdown()
+    
+    def update_countdown(self):
+        """Обновляет отсчет времени и текст кнопки"""
+        if self.countdown_seconds > 0:
+            # Обновляем текст кнопки с оставшимся временем
+            if self.start_button:
+                self.start_button.config(text=f"✅ Запустить ({self.countdown_seconds})")
+            
+            self.countdown_seconds -= 1
+            # Планируем следующее обновление через 1 секунду
+            self.timer_id = self.root.after(1000, self.update_countdown)
+        else:
+            # Время истекло - автоматически запускаем
+            self.ok()
+    
+    def stop_countdown(self):
+        """Останавливает таймер обратного отсчета"""
+        if self.timer_id:
+            self.root.after_cancel(self.timer_id)
+            self.timer_id = None
+    
     def ok(self):
         """Обработчик кнопки OK"""
+        # Останавливаем таймер при ручном нажатии
+        self.stop_countdown()
+        
         if not self.device_var.get():
             messagebox.showwarning("Предупреждение", "Пожалуйста, выберите микрофон")
             return
@@ -193,6 +229,8 @@ class SettingsDialog:
             
     def cancel(self):
         """Обработчик кнопки Отмена"""
+        # Останавливаем таймер при отмене
+        self.stop_countdown()
         self.result = False
         self.root.destroy()
         
