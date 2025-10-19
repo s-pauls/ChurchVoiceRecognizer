@@ -1,10 +1,10 @@
 import src.voice_recogniz_management as vrm
-from src.actions import action_switch_off_all_mics
+from src.actions import action_switch_off_all_mics, shutdown
 
 PRIORITY_COMMANDS = {
-    "handle_stop": ["стоп", "ангела хранителя", "ангела-хранителя"],
+    "handle_stop": ["стоп"],
     "handle_mic_off": ["выключи микрофоны"],
-    "handle_shutdown": ["выключи компьютер"],
+    "handle_shutdown": ["выключи компьютер", "ангела хранителя", "ангела-хранителя"],
     "handle_pause": ["пауза"],
     "handle_resume": ["продолжай"]
 }
@@ -36,7 +36,7 @@ class BaseProcessor:
         action_switch_off_all_mics()
 
     def handle_shutdown(self):
-        self.logger.info("✅ Действие: Выключение компьютера (заглушка)")
+        shutdown()
 
     def handle_pause(self):
         # Placeholder: implement pause behavior if needed

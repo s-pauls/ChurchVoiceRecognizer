@@ -9,7 +9,7 @@ class StateExecutionPhase(Enum):
     READY = "ready"  # Готов к обработке фраз
     ON_BEGIN_DELAY = "on_begin_delay"  # Ожидание onBeginDelaySeconds
     ON_BEGIN_ACTION = "on_begin_action"  # Выполнение onBeginAction
-    SLEEP_TIMEOUT = "sleep_timeout"  # Ожидание sleepTimeout
+    AFTER_ACTION_SLEEP = "after_action_sleep"  # Ожидание sleepTimeout
     AFTER_SLEEP_ACTION = "after_sleep_action"  # Выполнение afterSleepAction
 
 
@@ -37,13 +37,8 @@ class LiturgyFSM:
         # Ищем подходящий переход для текущего состояния
         transition, next_state = self._find_transition(phrase_lower)
         if transition:
-            self._execute_transition(transition, next_state)
+            self._execute_transition(transition, next_state, phrase)
             return True
-        else:
-            pass
-            # Дополнительно проверяем, есть ли триггеры в тексте для любого состояния
-            # Это поможет восстановиться, если мы пропустили переход
-            # self._check_recovery_transitions(phrase_lower)
 
         return False
 
@@ -62,18 +57,19 @@ class LiturgyFSM:
         # Проверяем текущую фазу
         if self.execution_phase == StateExecutionPhase.ON_BEGIN_DELAY:
             if state_config.onBeginDelaySeconds and elapsed_time < state_config.onBeginDelaySeconds:
-                self.logger.info(f"⏳ onBeginDelay для '{self.current_state_name}' "
-                               f"({int(elapsed_time)}/{state_config.onBeginDelaySeconds}с)")
+                # self.logger.info(f"⏳ onBeginDelay для '{self.current_state_name}' "
+                #               f"({int(elapsed_time)}/{state_config.onBeginDelaySeconds}с)")
                 return True
             else:
                 # Переходим к выполнению onBeginAction
                 self._execute_on_begin_action()
                 return True
                 
-        elif self.execution_phase == StateExecutionPhase.SLEEP_TIMEOUT:
-            if state_config.sleepTimeout and elapsed_time < state_config.sleepTimeout:
-                self.logger.info(f"⏳ sleepTimeout для '{self.current_state_name}' "
-                               f"({int(elapsed_time)}/{state_config.sleepTimeout}с)")
+        elif self.execution_phase == StateExecutionPhase.AFTER_ACTION_SLEEP:
+            if state_config.afterActionSleepSeconds and elapsed_time < state_config.afterActionSleepSeconds:
+                # if int(elapsed_time)==0 or int(elapsed_time)==state_config.sleepTimeout:
+                #    self.logger.info(f"⏳ Ожидание после действия для '{self.current_state_name}' "
+                #               f"({state_config.sleepTimeout}с)")
                 return True
             else:
                 # Переходим к выполнению afterSleepAction
@@ -96,8 +92,10 @@ class LiturgyFSM:
             state_config.onBeginAction()
         
         # Переходим к sleepTimeout или завершаем
-        if state_config.sleepTimeout and state_config.sleepTimeout > 0:
-            self._set_phase(StateExecutionPhase.SLEEP_TIMEOUT)
+        if state_config.afterActionSleepSeconds and state_config.afterActionSleepSeconds > 0:
+            self.logger.info(
+                f"🕐 Запущен afterActionSleep для '{self.current_state_name}' ({state_config.afterActionSleepSeconds}с)")
+            self._set_phase(StateExecutionPhase.AFTER_ACTION_SLEEP)
         else:
             self._execute_after_sleep_action()
 
@@ -135,7 +133,7 @@ class LiturgyFSM:
     def _phrase_matches_triggers(phrase: str, triggers: List[str]) -> bool:
         return any(trigger.lower() in phrase for trigger in triggers)
 
-    def _execute_transition(self, transition: StateTransition, next_state: str):
+    def _execute_transition(self, transition: StateTransition, next_state: str, phrase: str):
         old_state = self.current_state_name
         self.current_state_name = next_state
 
@@ -143,7 +141,7 @@ class LiturgyFSM:
         if state_config:
             self.current_state = state_config
 
-        self.logger.info(f"▶️ Переход: {old_state} → {self.current_state_name}")
+        self.logger.info(f"▶️ Переход: {old_state} → {self.current_state_name} по фразе: '{phrase}'")
 
         # Запускаем последовательность выполнения нового состояния
         self._start_state_execution()

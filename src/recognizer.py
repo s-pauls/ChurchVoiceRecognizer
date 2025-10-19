@@ -32,13 +32,15 @@ class VoiceRecognizer:
         self.rec = vosk.KaldiRecognizer(self.model, 16000)
         self.logger = logger
         self.phrase_processor = phrase_processor
-        
+
+
         # Буфер для накопления текста
         self.text_buffer = deque()
         self.buffer_duration = buffer_duration
         self.min_phrase_length = min_phrase_length
         self.last_partial_text = ""
         self.last_activity_time = time.time()
+        self.last_handled_time = time.time()
 
     def _callback(self, indata, frames, time, status):
         if status:
@@ -58,11 +60,10 @@ class VoiceRecognizer:
                     # Полный результат распознавания
                     result = json.loads(self.rec.Result())
                     text = result.get("text", "").lower().strip()
-                    
                     if text and len(text) >= self.min_phrase_length:
                         # self.logger.info(f"Распознано полное: {text}")
                         self._add_to_buffer(text, current_time)
-                        self._process_buffer()
+                        self._process_buffer(current_time)
                         self.last_partial_text = ""  # Сброс частичного текста
                 else:
                     # Частичный результат распознавания
@@ -77,20 +78,74 @@ class VoiceRecognizer:
                             
                             # Добавляем частичный текст в буфер для анализа длинных фраз
                             self._add_to_buffer(partial_text, current_time, is_partial=True)
-                            self._process_buffer()
+                            self._process_buffer(current_time)
                 
                 # Периодическая очистка буфера
                 self._cleanup_buffer(current_time)
             self.logger.info("Завершено прослушивание")
     
     def _add_to_buffer(self, text: str, timestamp: float, is_partial: bool = False):
-        """Добавляет текст в буфер с временной меткой."""
-        self.text_buffer.append({
-            'text': text,
-            'timestamp': timestamp,
-            'is_partial': is_partial
-        })
+        """Добавляет только новую часть текста в буфер с временной меткой."""
+        # Получаем новую часть текста, которой еще нет в буфере
+        new_text_part = self._get_new_text_part(text)
+        
+        # Добавляем только если есть новая часть
+        if new_text_part:
+            self.text_buffer.append({
+                'text': new_text_part,
+                'timestamp': timestamp,
+                'is_partial': is_partial
+            })
         self.last_activity_time = timestamp
+    
+    def _get_new_text_part(self, text: str) -> str:
+        """Определяет новую часть текста, которой еще нет в буфере."""
+        if not text or not self.text_buffer:
+            return text
+        
+        # Получаем все тексты из буфера в одну строку
+        existing_texts = []
+        for entry in self.text_buffer:
+            existing_texts.append(entry['text'])
+        
+        combined_existing = ' '.join(existing_texts)
+        
+        # Разбиваем входящий и существующий тексты на слова
+        new_words = text.split()
+        existing_words = combined_existing.split()
+        
+        # Находим индекс, с которого начинаются новые слова
+        new_words_start_index = 0
+        
+        # Проверяем различные варианты пересечения
+        for i in range(len(new_words)):
+            # Проверяем, есть ли подстрока new_words[i:] в конце existing_words
+            remaining_new_words = new_words[i:]
+            if len(remaining_new_words) > len(existing_words):
+                continue
+                
+            # Проверяем совпадение с концом существующих слов
+            if len(existing_words) >= len(remaining_new_words):
+                if existing_words[-len(remaining_new_words):] == remaining_new_words:
+                    # Все оставшиеся слова уже есть в буфере
+                    return ""
+                    
+            # Проверяем частичное совпадение
+            match_found = False
+            for j in range(min(len(remaining_new_words), len(existing_words))):
+                if existing_words[-(j+1):] == remaining_new_words[:j+1]:
+                    new_words_start_index = i + j + 1
+                    match_found = True
+                    break
+            
+            if match_found:
+                break
+                
+        # Возвращаем только новые слова
+        if new_words_start_index < len(new_words):
+            return ' '.join(new_words[new_words_start_index:])
+        
+        return ""
     
     def _cleanup_buffer(self, current_time: float):
         """Удаляет старые записи из буфера."""
@@ -98,10 +153,6 @@ class VoiceRecognizer:
         while self.text_buffer and self.text_buffer[0]['timestamp'] < cutoff_time:
             self.text_buffer.popleft()
 
-    def _clear_buffer(self):
-        """Удаляет все записи из буфера."""
-        self.text_buffer.clear()
-    
     def _is_significant_change(self, new_text: str) -> bool:
         """Проверяет, существенно ли изменился частичный текст."""
         if not self.last_partial_text:
@@ -116,17 +167,18 @@ class VoiceRecognizer:
         old_words = set(self.last_partial_text.split())
         return len(new_words - old_words) > 0
     
-    def _process_buffer(self):
+    def _process_buffer(self, timestamp: float):
         """Обрабатывает накопленный в буфере текст."""
         if not self.text_buffer:
             return
         
         # Создаем объединенный текст из последних записей
         recent_texts = []
-        current_time = time.time()
+        current_time = timestamp
         
         # Берем тексты за последние 10 секунд для анализа контекста
-        context_window = 10
+        last_handled_interval = current_time - self.last_handled_time
+        context_window = min(10.0, last_handled_interval)
         cutoff_time = current_time - context_window
         
         for entry in self.text_buffer:
@@ -139,8 +191,7 @@ class VoiceRecognizer:
             # Объединяем тексты и обрабатываем
             combined_text = ' '.join(recent_texts)
             if self._process_recognized_text(combined_text):
-                # очистка ничего не дает, так как в полной или частичной фразе содержутся фразы и они восстанавливаются!
-                self._clear_buffer()
+                self.last_handled_time = time.time()
                 return
             
             # Также обрабатываем последний полный текст отдельно
@@ -148,8 +199,7 @@ class VoiceRecognizer:
                              if not entry['is_partial']]
             if last_full_texts:
                 if self._process_recognized_text(last_full_texts[-1]):
-                    # очистка ничего не дает, так как в полной или частичной фразе содержутся фразы и они восстанавливаются!
-                    self._clear_buffer()
+                    self.last_handled_time = time.time()
     
     def _is_duplicate_of_recent_full(self, partial_text: str) -> bool:
         """Проверяет, не является ли частичный текст дублем недавнего полного результата."""

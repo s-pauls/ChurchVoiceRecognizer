@@ -17,7 +17,7 @@ class StateTransition:
     transitions: List[StateTransitionCondition]  # Фразы, которые запускают переход
     onBeginDelaySeconds: Optional[int] = None # Задержка перед действием
     onBeginAction: Optional[Callable] = None
-    sleepTimeout: Optional[int] = None  # Задержка после действия
+    afterActionSleepSeconds: Optional[int] = None  # Задержка после действия
     afterSleepAction: Optional[Callable] = None
 
 def get_default_config() -> Dict[str, StateTransition]:
@@ -55,7 +55,7 @@ def get_default_config() -> Dict[str, StateTransition]:
         ),
         "3_ЧАС_ОТЧЕ_НАШ_1_ЗАКОНЧИЛСЯ": StateTransition(
             onBeginAction=action_reader_only,
-            sleepTimeout=5*60,
+            afterActionSleepSeconds=5 * 60,
             transitions=[
                 StateTransitionCondition(
                     trigger_phrases=OTCHE_NASH,
@@ -73,7 +73,7 @@ def get_default_config() -> Dict[str, StateTransition]:
         ),
         "3_ЧАС_ОТЧЕ_НАШ_2_ЗАКОНЧИЛСЯ": StateTransition(
             onBeginAction=action_reader_only,
-            sleepTimeout=1*60,
+            afterActionSleepSeconds=1 * 60,
             transitions=[
                 StateTransitionCondition(
                     trigger_phrases=["херувим", "без сравнения", "серафим", "бога слова", "богородицу"],
@@ -90,7 +90,7 @@ def get_default_config() -> Dict[str, StateTransition]:
         ),
         "3_ЧАС_ЧЕСТНЕЙШУЮ_ХЕРУВИМ_КОНЕЦ": StateTransition(
             onBeginAction=action_reader_only,
-            sleepTimeout=1 * 60,
+            afterActionSleepSeconds=1 * 60,
             transitions=[
                 StateTransitionCondition(
                     trigger_phrases=["придите поклонимся", "придите поклониться", "самому христу"],
@@ -98,7 +98,7 @@ def get_default_config() -> Dict[str, StateTransition]:
                 )],
         ),
         "6_ЧАС_НАЧАЛСЯ": StateTransition(
-            sleepTimeout=4*60,
+            afterActionSleepSeconds=4 * 60,
             transitions=[
                 StateTransitionCondition(
                     trigger_phrases=OTCHE_NASH,
@@ -116,7 +116,7 @@ def get_default_config() -> Dict[str, StateTransition]:
         ),
         "6_ЧАС_ОТЧЕ_НАШ_ЗАКОНЧИЛСЯ": StateTransition(
             onBeginAction=action_reader_only,
-            sleepTimeout=1*60,
+            afterActionSleepSeconds=1 * 60,
             transitions=[
                 StateTransitionCondition(
                     trigger_phrases=["придите поклонимся", "придите поклониться", "самому христу"],
@@ -133,7 +133,7 @@ def get_default_config() -> Dict[str, StateTransition]:
         ),
         "6_ЧАС_ЧЕСТНЕЙШУЮ_ХЕРУВИМ_КОНЕЦ": StateTransition(
             onBeginAction=action_reader_only,
-            sleepTimeout=10,
+            afterActionSleepSeconds=10,
             transitions=[
                 StateTransitionCondition(
                     trigger_phrases=["аминь", "боже", "господа нашего", "иисуса христа", "прийми", "пригвозди"],
