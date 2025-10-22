@@ -12,10 +12,6 @@ strComputer = "."
 Set objShell = CreateObject("WScript.Shell")
 Set objWMIService = GetObject("winmgmts:" & "{impersonationLevel=impersonate}!\\" & strComputer & "\root\cimv2")
 
-' Уведомление пользователя
-MsgBox "ВНИМАНИЕ! Через 5 секунд компьютер будет выключен!" & vbCrLf & _
-       "Все активные программы будут завершены.", vbExclamation + vbOKOnly, "Выключение системы"
-
 ' Завершение всех пользовательских процессов
 WScript.Echo "Завершение активных программ..."
 
@@ -45,15 +41,9 @@ For Each objProcess in colProcesses
     End If
 Next
 
-' Обратный отсчет с уведомлениями
-For intCountdown = 5 To 1 Step -1
-    WScript.Echo "Выключение через " & intCountdown & " секунд..."
-    WScript.Sleep 1000
-Next
-
 ' Принудительное выключение компьютера
 WScript.Echo "Выключение компьютера..."
-objShell.Run "shutdown /s /f /t 5", 0, False
+objShell.Run "shutdown /s /f /t 10", 0, False
 
 ' Освобождение объектов
 Set objProcess = Nothing

@@ -1,5 +1,5 @@
-import src.voice_recogniz_management as vrm
-from src.actions import action_switch_off_all_mics, shutdown
+import voice_recogniz_management as vrm
+from actions import action_switch_off_all_mics, shutdown
 
 PRIORITY_COMMANDS = {
     "handle_stop": ["стоп"],
@@ -37,6 +37,7 @@ class BaseProcessor:
 
     def handle_shutdown(self):
         shutdown()
+        self.handle_stop()
 
     def handle_pause(self):
         # Placeholder: implement pause behavior if needed

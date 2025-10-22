@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Callable
-from src.actions import action_reader_only, action_altar_and_reader
+from actions import action_reader_only, action_altar_and_reader
 
 OTCHE_NASH = ["отче наш", "имя твое", "царствие твое", "долги наши",
                 "отче наш иже еси", "да святится имя", "да приидет царствие",

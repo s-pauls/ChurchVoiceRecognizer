@@ -1,7 +1,7 @@
 import time
 from typing import Dict, List, Optional
 from enum import Enum
-from src.processors.liturgy_fsm_config import get_default_config, StateTransition
+from processors.liturgy_fsm_config import get_default_config, StateTransition
 
 
 class StateExecutionPhase(Enum):

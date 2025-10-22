@@ -6,7 +6,7 @@ import time
 from typing import Callable, Optional
 from collections import deque
 
-import src.voice_recogniz_management as vrm
+import voice_recogniz_management as vrm
 
 
 class VoiceRecognizer:

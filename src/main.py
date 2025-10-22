@@ -1,4 +1,4 @@
-import src.voice_recogniz_management as vrm
+import voice_recogniz_management as vrm
 from config import PATH_TO_MODEL
 from recognizer import VoiceRecognizer
 from logger import setup_logger

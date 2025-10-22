@@ -1,4 +1,5 @@
 @echo off
+chcp 65001 >nul
 setlocal
 
 echo ========================================
@@ -11,9 +12,9 @@ set "PROJECT_DIR=%~dp0"
 echo Рабочий каталог: %PROJECT_DIR%
 
 :: Проверка и активация виртуального окружения
-if exist "%PROJECT_DIR%venv\Scripts\activate.bat" (
+if exist "%PROJECT_DIR%.venv\Scripts\activate.bat" (
     echo Найдено виртуальное окружение, активируем...
-    call "%PROJECT_DIR%venv\Scripts\activate.bat"
+    call "%PROJECT_DIR%.venv\Scripts\activate.bat"
     if %errorlevel% neq 0 (
         echo ОШИБКА: Не удается активировать виртуальное окружение!
         pause
@@ -34,17 +35,9 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-:: Переход в папку src
-echo Переход в папку src...
-cd /d "%PROJECT_DIR%src"
-if %errorlevel% neq 0 (
-    echo ОШИБКА: Не удается найти папку src!
-    pause
-    exit /b 1
-)
 
 :: Проверка наличия main.py
-if not exist "main.py" (
+if not exist "src\main.py" (
     echo ОШИБКА: Файл main.py не найден в папке src!
     pause
     exit /b 1
@@ -60,7 +53,7 @@ if not exist "%PROJECT_DIR%models" (
 echo.
 echo Запуск приложения...
 echo ----------------------------------------
-python main.py
+python src\main.py
 
 echo.
 echo ----------------------------------------
@@ -71,4 +64,3 @@ if %errorlevel% neq 0 (
 )
 
 echo.
-pause
