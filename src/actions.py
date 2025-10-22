@@ -5,15 +5,22 @@ from logger import setup_logger
 
 logger = setup_logger(name="actions", log_file="actions.log")
 
+CTRL_SHIFT_A = "^(+(A))"
+CTRL_SHIFT_T = "^(+(T))"
+CTRL_SHIFT_L = "^(+(L))"
+
 
 def action_altar_and_reader():
     logger.info("✅ Действие Алтарь + Чтец")
+    send_keys_to_obs(CTRL_SHIFT_T)
 
 def action_reader_only():
     logger.info("✅ Действие Только чтец")
+    send_keys_to_obs(CTRL_SHIFT_L)
 
 def action_switch_off_all_mics():
     logger.info("✅ Действие Выключить все микрофоны")
+    send_keys_to_obs(CTRL_SHIFT_A)
 
 def action_play_bam():
     """Воспроизводит файл bam.wav"""
