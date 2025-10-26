@@ -19,7 +19,7 @@ class SettingsDialog:
         self.saved_settings = load_settings()
         
         # Инициализируем таймер автозапуска
-        self.countdown_seconds = 5
+        self.countdown_seconds = 10
         self.timer_id = None
         self.start_button = None
 
@@ -100,14 +100,16 @@ class SettingsDialog:
             service_frame,
             text="🕊 Божественная Литургия",
             variable=self.service_var,
-            value="литургия"
+            value="литургия",
+            command=self.on_form_change
         ).pack(anchor="w", pady=2)
 
         ttk.Radiobutton(
             service_frame,
             text="🌟 Всенощное бдение",
             variable=self.service_var,
-            value="всенощная"
+            value="всенощная",
+            command=self.on_form_change
         ).pack(anchor="w", pady=2)
 
         # Выбор аудио устройства
@@ -125,6 +127,9 @@ class SettingsDialog:
         )
         self.device_combo.pack(fill="x", pady=(0, 5))
         
+        # Привязываем обработчик изменения устройства
+        self.device_combo.bind('<<ComboboxSelected>>', self.on_form_change)
+        
         # Загружаем список устройств
         self.load_audio_devices()
         
@@ -132,7 +137,7 @@ class SettingsDialog:
         refresh_btn = ttk.Button(
             device_frame, 
             text="🔄 Обновить список", 
-            command=self.load_audio_devices
+            command=self.refresh_devices
         )
         refresh_btn.pack(anchor="e", pady=(5, 0))
         
@@ -182,6 +187,18 @@ class SettingsDialog:
                 
         except Exception as e:
             messagebox.showerror("Ошибка", f"Не удалось загрузить аудио устройства:\n{e}")
+            
+    def refresh_devices(self):
+        """Обновляет список устройств и останавливает автозапуск"""
+        self.on_form_change()  # Останавливаем таймер
+        self.load_audio_devices()  # Загружаем устройства
+            
+    def on_form_change(self, event=None):
+        """Обработчик изменения состояния формы - останавливает автозапуск"""
+        self.stop_countdown()
+        # Обновляем текст кнопки, убирая обратный отсчет
+        if self.start_button:
+            self.start_button.config(text="✅ Запустить")
             
     def start_countdown(self):
         """Запускает таймер обратного отсчета"""

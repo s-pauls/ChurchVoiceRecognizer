@@ -55,9 +55,6 @@ def main():
 
         return False
 
-    # Ожидаем до времени начала службы
-    wait_until_service_time()
-
     # Создаем и запускаем распознавание
     recognizer = VoiceRecognizer(
         model_path=PATH_TO_MODEL, 
@@ -65,6 +62,10 @@ def main():
         logger=logger,
         phrase_processor=combined_processor
     )
+
+    # Ожидаем до времени начала службы
+    wait_until_service_time()
+
     recognizer.listen()
 
 
