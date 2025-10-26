@@ -5,22 +5,36 @@ from logger import setup_logger
 
 logger = setup_logger(name="actions", log_file="actions.log")
 
+CTRL_SHIFT_X = "^(+(X))"
 CTRL_SHIFT_A = "^(+(A))"
-CTRL_SHIFT_T = "^(+(T))"
-CTRL_SHIFT_L = "^(+(L))"
+CTRL_SHIFT_P = "^(+(P))"
+CTRL_SHIFT_D = "^(+(D))"
+CTRL_SHIFT_B = "^(+(B))"
+CTRL_SHIFT_H = "^(+(H))"
 
+def action_altar_and_chorus():
+    logger.info("✅ Действие Алтарь + Хор")
+    send_keys_to_obs(CTRL_SHIFT_P)
 
 def action_altar_and_reader():
     logger.info("✅ Действие Алтарь + Чтец")
-    send_keys_to_obs(CTRL_SHIFT_T)
+    send_keys_to_obs(CTRL_SHIFT_H)
+
+def action_altar_only():
+    logger.info("✅ Действие Алтарь")
+    send_keys_to_obs(CTRL_SHIFT_A)
 
 def action_reader_only():
-    logger.info("✅ Действие Только чтец")
-    send_keys_to_obs(CTRL_SHIFT_L)
+    logger.info("✅ Действие Чтец")
+    send_keys_to_obs(CTRL_SHIFT_B)
+
+def action_reader_remote():
+    logger.info("✅ Действие Чтец (петличка)")
+    send_keys_to_obs(CTRL_SHIFT_D)
 
 def action_switch_off_all_mics():
     logger.info("✅ Действие Выключить все микрофоны")
-    send_keys_to_obs(CTRL_SHIFT_A)
+    send_keys_to_obs(CTRL_SHIFT_X)
 
 def action_play_bam():
     """Воспроизводит файл bam.wav"""
