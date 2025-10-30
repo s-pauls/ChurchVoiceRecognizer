@@ -11,9 +11,14 @@ CTRL_SHIFT_P = "^(+(P))"
 CTRL_SHIFT_D = "^(+(D))"
 CTRL_SHIFT_B = "^(+(B))"
 CTRL_SHIFT_H = "^(+(H))"
+CTRL_SHIFT_T = "^(+(T))"
 
 def action_altar_and_chorus():
     logger.info("✅ Действие Алтарь + Хор")
+    send_keys_to_obs(CTRL_SHIFT_T)
+
+def action_altar_and_chorus_reverb():
+    logger.info("✅ Действие Алтарь + Хор (протяжно)")
     send_keys_to_obs(CTRL_SHIFT_P)
 
 def action_altar_and_reader():
