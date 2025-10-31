@@ -41,7 +41,7 @@ class LiturgyFSM:
         # Ищем подходящий переход для текущего состояния
         transition, next_state, matched_trigger = self._find_transition(phrase_lower)
         if transition:
-            self._execute_transition(transition, next_state, matched_trigger)
+            self._execute_transition(transition, next_state, matched_trigger, phrase)
             return True
 
         return False
@@ -164,7 +164,7 @@ class LiturgyFSM:
                 return True, trigger
         return False, None
 
-    def _execute_transition(self, transition: StateTransition, next_state: str, trigger: str):
+    def _execute_transition(self, transition: StateTransition, next_state: str, trigger: str, phrase: str = None):
         old_state = self.current_state_name
         self.current_state_name = next_state
         self.state_start_time = time.time()  # Запоминаем время перехода в новое состояние
@@ -173,7 +173,10 @@ class LiturgyFSM:
         if state_config:
             self.current_state = state_config
 
-        self.logger.info(f"▶️ Переход: {old_state} → {self.current_state_name} по фразе: '{trigger}'")
+        if phrase:
+            self.logger.info(f"▶️ Переход: {old_state} → {self.current_state_name} по триггеру: '{trigger}' в фразе '{phrase}'")
+        else:
+            self.logger.info(f"▶️ Переход: {old_state} → {self.current_state_name} по триггеру: '{trigger}'")
 
         # Запускаем последовательность выполнения нового состояния
         self._start_state_execution()

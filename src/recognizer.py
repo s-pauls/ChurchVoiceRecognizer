@@ -190,6 +190,7 @@ class VoiceRecognizer:
         if recent_texts:
             # Объединяем тексты и обрабатываем
             combined_text = ' '.join(recent_texts)
+            self.logger.info(f"Распознано: {combined_text}")
             if self._process_recognized_text(combined_text):
                 self.last_handled_time = time.time()
                 return

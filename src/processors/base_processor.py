@@ -2,7 +2,7 @@ import voice_recogniz_management as vrm
 from actions import action_switch_off_all_mics, shutdown
 
 PRIORITY_COMMANDS = {
-    "handle_stop": ["стоп"],
+    "handle_stop": ["останови распознавание"],
     "handle_mic_off": ["выключи микрофоны"],
     "handle_shutdown": ["выключи компьютер", "ангела хранителя", "ангела-хранителя"],
     "handle_pause": ["пауза"],
