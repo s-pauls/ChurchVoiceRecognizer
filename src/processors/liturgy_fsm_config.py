@@ -171,12 +171,7 @@ def get_default_config() -> Dict[str, StateTransition]:
             # timeoutSeconds=20 * 60, # Максимум 20 минут до Сугубой ектении
             afterActionSleepSeconds=45 *60,# 15 * 60,
             transitions=[
-                '''
-                StateTransitionCondition(
-                    trigger_phrases=["eще молимся", "eщё молимся", "всего помышления нашего", "господи помилуй господи помилуй", "кирилл", "стефан"],
-                    next_state="СУГУБАЯ_ЕКТЕНИЯ"
-                ),
-                '''
+
                 StateTransitionCondition(
                     trigger_phrases=["молитвами святых", "отец наших"],
                     next_state="ЗАПРИЧАСТНОЕ_ЧТЕНИЕ",
@@ -188,7 +183,15 @@ def get_default_config() -> Dict[str, StateTransition]:
                 StateTransitionCondition(
                     trigger_phrases=["во имя отца и сына", "духа", "спаси господи всех", "причастников с принятием"],
                     next_state="ПРОПОВЕДЬ",
-                )
+                ),
+
+                '''
+                StateTransitionCondition(
+                    trigger_phrases=["eще молимся", "eщё молимся", "всего помышления нашего", "господи помилуй господи помилуй", "кирилл", "стефан"],
+                    next_state="СУГУБАЯ_ЕКТЕНИЯ"
+                ),
+            
+                '''
             ],
         ),
         '''
