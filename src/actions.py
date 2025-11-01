@@ -76,3 +76,21 @@ def shutdown():
         subprocess.run(f'cscript {args}', shell=True)
     except Exception as e:
         logger.error(f"Ошибка при запуске VBS: {e}")
+
+def start_aimp():
+    try:
+        vbs_path = os.path.abspath("scripts\\start_aimp.vbs")
+        # Формируем аргументы для передачи в VBS
+        args = f'"{vbs_path}"'
+        subprocess.run(f'cscript {args}', shell=True)
+    except Exception as e:
+        logger.error(f"Ошибка при запуске VBS: {e}")
+
+def stop_aimp():
+    try:
+        vbs_path = os.path.abspath("scripts\\stop_aimp.vbs")
+        # Формируем аргументы для передачи в VBS
+        args = f'"{vbs_path}"'
+        subprocess.run(f'cscript {args}', shell=True)
+    except Exception as e:
+        logger.error(f"Ошибка при запуске VBS: {e}")

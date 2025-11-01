@@ -1,12 +1,14 @@
 import voice_recogniz_management as vrm
-from actions import action_switch_off_all_mics, shutdown
+from actions import action_switch_off_all_mics, start_aimp, stop_aimp, shutdown
 
 PRIORITY_COMMANDS = {
     "handle_stop": ["останови распознавание"],
     "handle_mic_off": ["выключи микрофоны"],
     "handle_shutdown": ["выключи компьютер", "ангела хранителя", "ангела-хранителя"],
     "handle_pause": ["пауза"],
-    "handle_resume": ["продолжай"]
+    "handle_resume": ["продолжай"],
+    "handle_aimp_start": ["включи хор", "включи музыку"],
+    "handle_aimp_stop": ["выключи хор", "выключи музыку"],
 }
 
 
@@ -47,3 +49,9 @@ class BaseProcessor:
     def handle_resume(self):
         vrm.VoiceRecognizerOnPause = False
         self.logger.info("Выключен флаг паузы распознавания")
+
+    def handle_aimp_start(self):
+        start_aimp()
+
+    def handle_aimp_stop(self):
+        stop_aimp()
