@@ -41,6 +41,7 @@ class VoiceRecognizer:
         self.last_partial_text = ""
         self.last_activity_time = time.time()
         self.last_handled_time = time.time()
+        self.last_processed_text = ""
 
     def _callback(self, indata, frames, time, status):
         if status:
@@ -178,7 +179,7 @@ class VoiceRecognizer:
         
         # Берем тексты за последние 10 секунд для анализа контекста
         last_handled_interval = current_time - self.last_handled_time
-        context_window = min(10.0, last_handled_interval)
+        context_window = min(5.0, last_handled_interval)
         cutoff_time = current_time - context_window
         
         for entry in self.text_buffer:
@@ -190,17 +191,14 @@ class VoiceRecognizer:
         if recent_texts:
             # Объединяем тексты и обрабатываем
             combined_text = ' '.join(recent_texts)
-            self.logger.info(f"Распознано: {combined_text}")
-            if self._process_recognized_text(combined_text):
-                self.last_handled_time = time.time()
-                return
-            
-            # Также обрабатываем последний полный текст отдельно
-            last_full_texts = [entry['text'] for entry in self.text_buffer 
-                             if not entry['is_partial']]
-            if last_full_texts:
-                if self._process_recognized_text(last_full_texts[-1]):
+            # Проверяем, отличается ли текст от предыдущего обработанного
+            if combined_text != self.last_processed_text:
+                self.last_processed_text = combined_text
+                self.logger.info(f"Распознано: {combined_text}")
+                if self._process_recognized_text(combined_text):
                     self.last_handled_time = time.time()
+                    return
+            
     
     def _is_duplicate_of_recent_full(self, partial_text: str) -> bool:
         """Проверяет, не является ли частичный текст дублем недавнего полного результата."""
