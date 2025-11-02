@@ -1,2 +1,5 @@
 vosk==0.3.45
 sounddevice==0.4.6
+keyboard>=0.13.5
+pywin32>=306
+psutil>=5.9.0

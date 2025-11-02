@@ -2,6 +2,7 @@ import os
 import subprocess
 import winsound
 from logger import setup_logger
+from send_keys_to_obs_simple import OBSHotkeySimple
 
 logger = setup_logger(name="actions", log_file="actions.log")
 
@@ -15,31 +16,38 @@ CTRL_SHIFT_T = "^(+(T))"
 
 def action_altar_and_chorus():
     logger.info("✅ Действие Алтарь + Хор")
-    send_keys_to_obs(CTRL_SHIFT_T)
+    manager = OBSHotkeySimple()
+    manager.send_ctrl_shift_t()
 
 def action_altar_and_chorus_reverb():
     logger.info("✅ Действие Алтарь + Хор (протяжно)")
-    send_keys_to_obs(CTRL_SHIFT_P)
+    manager = OBSHotkeySimple()
+    manager.send_ctrl_shift_p()
 
 def action_altar_and_reader():
     logger.info("✅ Действие Алтарь + Чтец")
-    send_keys_to_obs(CTRL_SHIFT_H)
+    manager = OBSHotkeySimple()
+    manager.send_ctrl_shift_h()
 
 def action_altar_only():
     logger.info("✅ Действие Алтарь")
-    send_keys_to_obs(CTRL_SHIFT_A)
+    manager = OBSHotkeySimple()
+    manager.send_ctrl_shift_a()
 
 def action_reader_only():
     logger.info("✅ Действие Чтец")
-    send_keys_to_obs(CTRL_SHIFT_B)
+    manager = OBSHotkeySimple()
+    manager.send_ctrl_shift_b()
 
 def action_reader_remote():
     logger.info("✅ Действие Чтец (петличка)")
-    send_keys_to_obs(CTRL_SHIFT_D)
+    manager = OBSHotkeySimple()
+    manager.send_ctrl_shift_d()
 
 def action_switch_off_all_mics():
     logger.info("✅ Действие Выключить все микрофоны")
-    send_keys_to_obs(CTRL_SHIFT_X)
+    manager = OBSHotkeySimple()
+    manager.send_ctrl_shift_x()
 
 def action_play_bam():
     """Воспроизводит файл bam.wav"""
