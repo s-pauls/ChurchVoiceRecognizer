@@ -2,7 +2,7 @@ import os
 import subprocess
 import winsound
 from logger import setup_logger
-from send_keys_to_obs_simple import OBSHotkeySimple
+from send_keys_to_obs import OBSHotkeyManager
 
 logger = setup_logger(name="actions", log_file="actions.log")
 
@@ -16,37 +16,37 @@ CTRL_SHIFT_T = "^(+(T))"
 
 def action_altar_and_chorus():
     logger.info("✅ Действие Алтарь + Хор")
-    manager = OBSHotkeySimple()
+    manager = OBSHotkeyManager()
     manager.send_ctrl_shift_t()
 
 def action_altar_and_chorus_reverb():
     logger.info("✅ Действие Алтарь + Хор (протяжно)")
-    manager = OBSHotkeySimple()
+    manager = OBSHotkeyManager()
     manager.send_ctrl_shift_p()
 
 def action_altar_and_reader():
     logger.info("✅ Действие Алтарь + Чтец")
-    manager = OBSHotkeySimple()
+    manager = OBSHotkeyManager()
     manager.send_ctrl_shift_h()
 
 def action_altar_only():
     logger.info("✅ Действие Алтарь")
-    manager = OBSHotkeySimple()
+    manager = OBSHotkeyManager()
     manager.send_ctrl_shift_a()
 
 def action_reader_only():
     logger.info("✅ Действие Чтец")
-    manager = OBSHotkeySimple()
+    manager = OBSHotkeyManager()
     manager.send_ctrl_shift_b()
 
 def action_reader_remote():
     logger.info("✅ Действие Чтец (петличка)")
-    manager = OBSHotkeySimple()
+    manager = OBSHotkeyManager()
     manager.send_ctrl_shift_d()
 
 def action_switch_off_all_mics():
     logger.info("✅ Действие Выключить все микрофоны")
-    manager = OBSHotkeySimple()
+    manager = OBSHotkeyManager()
     manager.send_ctrl_shift_x()
 
 def action_play_bam():
@@ -62,19 +62,6 @@ def action_play_bam():
             logger.error(f"Файл {bam_file_path} не найден")
     except Exception as e:
         logger.error(f"Ошибка при воспроизведении bam.wav: {e}")
-
-def send_keys_to_obs(hotkey: str):
-    try:
-        vbs_path = os.path.abspath("scripts\\sendKeysTo.vbs")
-        obs_exe = "obs64.exe"
-
-        # Формируем аргументы для передачи в VBS
-        args = f'"{vbs_path}" "{obs_exe}" "{hotkey}"'
-        subprocess.run(f'cscript {args}', shell=True)
-
-    # self.logger.info("VBS-скрипт для OBS успешно запущен")
-    except Exception as e:
-        logger.error(f"Ошибка при запуске VBS: {e}")
 
 def shutdown():
     try:

@@ -111,8 +111,12 @@ def get_default_config() -> Dict[str, StateTransition]:
             afterActionSleepSeconds=1 * 60,
             transitions=[
                 StateTransitionCondition(
-                    trigger_phrases=["придите поклонимся", "придите поклониться", "самому христу"],
+                    trigger_phrases=["придите поклонимся", "придите поклониться", "приидите поклонимся", "приидите поклониться", "самому христу"],
                     next_state="6_ЧАС_НАЧАЛСЯ"
+                ),
+                StateTransitionCondition(
+                    trigger_phrases=OTCHE_NASH,
+                    next_state="6_ЧАС_ОТЧЕ_НАШ_НАЧАЛСЯ"
                 )
             ],
         ),
@@ -161,7 +165,8 @@ def get_default_config() -> Dict[str, StateTransition]:
             afterActionSleepSeconds=10,
             transitions=[
                 StateTransitionCondition(
-                    trigger_phrases=["благословенно царство", "отца", "сына", "святого духа", "аминь"],
+                    trigger_phrases=["любовью твоей", "благодарения высылаем", "светом наставляя", "животворящий"
+                        "благословенно царство", "отца", "сына", "святого духа", "аминь"],
                     next_state="ЛИТУРГИЯ_ОГЛАШЕННЫХ_НАЧАЛО"
                 )
             ],

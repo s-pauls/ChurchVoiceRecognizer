@@ -4,7 +4,7 @@ from actions import action_switch_off_all_mics, start_aimp, stop_aimp, shutdown
 PRIORITY_COMMANDS = {
     "handle_stop": ["останови распознавание"],
     "handle_mic_off": ["выключи микрофоны"],
-    "handle_shutdown": ["выключи компьютер", "ангела хранителя", "ангела-хранителя"],
+    "handle_shutdown": ["выключи компьютер", "ангела хранителя", "ангела-хранителя", "ангел-хранитель", "ангелы-хранители"],
     "handle_pause": ["пауза"],
     "handle_resume": ["продолжай"],
     "handle_aimp_start": ["включи хор", "включи музыку"],

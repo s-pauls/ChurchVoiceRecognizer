@@ -1,7 +1,8 @@
 """
 Модуль для отправки горячих клавиш в OBS64.exe
 Использует Windows API для надежной отправки клавиш
-Поддерживает сочетания: CTRL+SHIFT+T, CTRL+SHIFT+B, CTRL+SHIFT+A
+Поддерживает сочетания с любыми буквами A-Z: CTRL+SHIFT+[A-Z], CTRL+ALT+[A-Z], etc.
+Примеры: CTRL+SHIFT+T, CTRL+SHIFT+B, CTRL+SHIFT+A, CTRL+ALT+F, и т.д.
 """
 
 import time
@@ -20,13 +21,34 @@ VK_CONTROL = 0x11
 VK_SHIFT = 0x10
 VK_LCONTROL = 0xA2
 VK_LSHIFT = 0xA0
-VK_T = 0x54
-VK_B = 0x42
+
+# Буквы A-Z (виртуальные коды совпадают с ASCII)
 VK_A = 0x41
-VK_X = 0x58
-VK_P = 0x50
+VK_B = 0x42
+VK_C = 0x43
 VK_D = 0x44
+VK_E = 0x45
+VK_F = 0x46
+VK_G = 0x47
 VK_H = 0x48
+VK_I = 0x49
+VK_J = 0x4A
+VK_K = 0x4B
+VK_L = 0x4C
+VK_M = 0x4D
+VK_N = 0x4E
+VK_O = 0x4F
+VK_P = 0x50
+VK_Q = 0x51
+VK_R = 0x52
+VK_S = 0x53
+VK_T = 0x54
+VK_U = 0x55
+VK_V = 0x56
+VK_W = 0x57
+VK_X = 0x58
+VK_Y = 0x59
+VK_Z = 0x5A
 
 # Константы для событий клавиатуры
 KEYEVENTF_KEYUP = 0x0002
@@ -79,8 +101,10 @@ class OBSHotkeyManager:
             return None
             
         try:
+            windows = []
+
             # Ищем окна, принадлежащие процессу OBS
-            def enum_windows_callback(hwnd, windows):
+            def enum_windows_callback(hwnd, lparam):
                 if user32.IsWindowVisible(hwnd):
                     process_id = wintypes.DWORD()
                     user32.GetWindowThreadProcessId(hwnd, ctypes.byref(process_id))
@@ -95,7 +119,7 @@ class OBSHotkeyManager:
                                 windows.append(hwnd)
                 return True
             
-            windows = []
+
             WNDENUMPROC = ctypes.WINFUNCTYPE(wintypes.BOOL, wintypes.HWND, wintypes.LPARAM)
             user32.EnumWindows(WNDENUMPROC(enum_windows_callback), 0)
             
@@ -124,9 +148,17 @@ class OBSHotkeyManager:
     def send_key_combination(self, ctrl: bool = False, shift: bool = False, alt: bool = False, key_code: int = None):
         """Отправка комбинации клавиш через Windows API"""
         if key_code is None:
+            print("Ошибка: key_code не определен")
             return False
             
         try:
+            modifiers_text = []
+            if ctrl: modifiers_text.append("CTRL")
+            if shift: modifiers_text.append("SHIFT") 
+            if alt: modifiers_text.append("ALT")
+            
+            print(f"Отправляем комбинацию: {'+'.join(modifiers_text)}+{chr(key_code)} (код {key_code})")
+            
             # Нажимаем модификаторы
             if ctrl:
                 user32.keybd_event(VK_LCONTROL, 0, 0, None)
@@ -167,13 +199,13 @@ class OBSHotkeyManager:
         if not self.find_obs_process():
             print("Ошибка: OBS64.exe не запущен!")
             return False
-        
+
         # Получаем handle окна OBS
         hwnd = self.get_obs_window_handle()
         if not hwnd:
             print("Ошибка: Не удалось найти окно OBS!")
             return False
-        
+
         # Активируем окно OBS
         if not self.activate_obs_window(hwnd):
             print("Предупреждение: Не удалось активировать окно OBS, но продолжаем...")
@@ -186,22 +218,24 @@ class OBSHotkeyManager:
         shift = "SHIFT" in hotkey_upper
         alt = "ALT" in hotkey_upper
         
+        # Создаем словарь соответствия букв и их виртуальных кодов
+        key_map = {
+            'A': VK_A, 'B': VK_B, 'C': VK_C, 'D': VK_D, 'E': VK_E,
+            'F': VK_F, 'G': VK_G, 'H': VK_H, 'I': VK_I, 'J': VK_J,
+            'K': VK_K, 'L': VK_L, 'M': VK_M, 'N': VK_N, 'O': VK_O,
+            'P': VK_P, 'Q': VK_Q, 'R': VK_R, 'S': VK_S, 'T': VK_T,
+            'U': VK_U, 'V': VK_V, 'W': VK_W, 'X': VK_X, 'Y': VK_Y,
+            'Z': VK_Z
+        }
+        
+        # Находим последнюю букву в строке (основную клавишу)
         key_code = None
-        if "+T" in hotkey_upper:
-            key_code = VK_T
-        elif "+B" in hotkey_upper:
-            key_code = VK_B
-        elif "+A" in hotkey_upper:
-            key_code = VK_A
-        elif "+X" in hotkey_upper:
-            key_code = VK_X
-        elif "+P" in hotkey_upper:
-            key_code = VK_P
-        elif "+D" in hotkey_upper:
-            key_code = VK_D
-        elif "+H" in hotkey_upper:
-            key_code = VK_H
-        else:
+        for letter in key_map:
+            if f"+{letter}" in hotkey_upper:
+                key_code = key_map[letter]
+                break
+        
+        if key_code is None:
             print(f"Неподдерживаемая комбинация клавиш: {hotkey_string}")
             return False
         
@@ -235,7 +269,23 @@ class OBSHotkeyManager:
     def send_ctrl_shift_h(self) -> bool:
         """Отправка CTRL+SHIFT+H"""
         return self.send_hotkey_to_obs("CTRL+SHIFT+H")
-
+    
+    # Дополнительные методы для других популярных комбинаций
+    def send_ctrl_shift_f(self) -> bool:
+        """Отправка CTRL+SHIFT+F"""
+        return self.send_hotkey_to_obs("CTRL+SHIFT+F")
+    
+    def send_ctrl_shift_g(self) -> bool:
+        """Отправка CTRL+SHIFT+G"""
+        return self.send_hotkey_to_obs("CTRL+SHIFT+G")
+    
+    def send_ctrl_shift_r(self) -> bool:
+        """Отправка CTRL+SHIFT+R (для записи)"""
+        return self.send_hotkey_to_obs("CTRL+SHIFT+R")
+    
+    def send_ctrl_shift_s(self) -> bool:
+        """Отправка CTRL+SHIFT+S (для остановки)"""
+        return self.send_hotkey_to_obs("CTRL+SHIFT+S")
 
 def main():
     """Основная функция"""
@@ -252,11 +302,14 @@ def main():
     else:
         # Демонстрация всех поддерживаемых комбинаций
         print("Демонстрация отправки горячих клавиш в OBS...")
-        print("Поддерживаемые комбинации: CTRL+SHIFT+T, CTRL+SHIFT+B, CTRL+SHIFT+A, CTRL+SHIFT+X, CTRL+SHIFT+P, CTRL+SHIFT+D, CTRL+SHIFT+H")
+        print("Поддерживаются любые комбинации с буквами A-Z:")
+        print("- CTRL+SHIFT+[A-Z] (например: CTRL+SHIFT+T, CTRL+SHIFT+B)")
+        print("- CTRL+ALT+[A-Z] (например: CTRL+ALT+F, CTRL+ALT+G)")
+        print("- SHIFT+ALT+[A-Z], и другие комбинации модификаторов")
         print()
         
-        hotkeys = ["CTRL+SHIFT+T", "CTRL+SHIFT+B", "CTRL+SHIFT+A", 
-                  "CTRL+SHIFT+X", "CTRL+SHIFT+P", "CTRL+SHIFT+D", "CTRL+SHIFT+H"]
+        hotkeys = ["CTRL+SHIFT+O", "CTRL+SHIFT+M", "CTRL+SHIFT+A",
+                  "CTRL+SHIFT+K", "CTRL+SHIFT+B"]
         
         for hotkey in hotkeys:
             print(f"Отправка {hotkey}...")
@@ -266,7 +319,7 @@ def main():
             else:
                 print(f"✗ Ошибка при отправке {hotkey}")
             print()
-            time.sleep(1)
+            time.sleep(3)
 
 
 if __name__ == "__main__":
