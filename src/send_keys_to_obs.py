@@ -241,51 +241,78 @@ class OBSHotkeyManager:
         
         print(f"Отправка {hotkey_string} в OBS...")
         return self.send_key_combination(ctrl, shift, alt, key_code)
-    
-    def send_ctrl_shift_t(self) -> bool:
-        """Отправка CTRL+SHIFT+T"""
-        return self.send_hotkey_to_obs("CTRL+SHIFT+T")
-    
-    def send_ctrl_shift_b(self) -> bool:
-        """Отправка CTRL+SHIFT+B"""
-        return self.send_hotkey_to_obs("CTRL+SHIFT+B")
-    
+
     def send_ctrl_shift_a(self) -> bool:
         """Отправка CTRL+SHIFT+A"""
         return self.send_hotkey_to_obs("CTRL+SHIFT+A")
-    
-    def send_ctrl_shift_x(self) -> bool:
-        """Отправка CTRL+SHIFT+X"""
-        return self.send_hotkey_to_obs("CTRL+SHIFT+X")
-    
+
+    def send_ctrl_shift_b(self) -> bool:
+        """Отправка CTRL+SHIFT+B"""
+        return self.send_hotkey_to_obs("CTRL+SHIFT+B")
+
+    def send_ctrl_shift_d(self) -> bool:
+        """Отправка CTRL+SHIFT+D"""
+        return self.send_hotkey_to_obs("CTRL+SHIFT+D")
+
+    def send_ctrl_shift_e(self) -> bool:
+        """Отправка CTRL+SHIFT+E"""
+        return self.send_hotkey_to_obs("CTRL+SHIFT+E")
+
+    def send_ctrl_shift_f(self) -> bool:
+        """Отправка CTRL+SHIFT+F"""
+        return self.send_hotkey_to_obs("CTRL+SHIFT+F")
+
+    def send_ctrl_shift_g(self) -> bool:
+        """Отправка CTRL+SHIFT+G"""
+        return self.send_hotkey_to_obs("CTRL+SHIFT+G")
+
+    def send_ctrl_shift_h(self) -> bool:
+        """Отправка CTRL+SHIFT+H"""
+        return self.send_hotkey_to_obs("CTRL+SHIFT+H")
+
+    def send_ctrl_shift_i(self) -> bool:
+        """Отправка CTRL+SHIFT+I"""
+        return self.send_hotkey_to_obs("CTRL+SHIFT+I")
+
+    def send_ctrl_shift_j(self) -> bool:
+        """Отправка CTRL+SHIFT+J"""
+        return self.send_hotkey_to_obs("CTRL+SHIFT+J")
+
+    def send_ctrl_shift_m(self) -> bool:
+        """Отправка CTRL+SHIFT+M"""
+        return self.send_hotkey_to_obs("CTRL+SHIFT+M")
+
+    def send_ctrl_shift_o(self) -> bool:
+        """Отправка CTRL+SHIFT+O"""
+        return self.send_hotkey_to_obs("CTRL+SHIFT+O")
+
     def send_ctrl_shift_p(self) -> bool:
         """Отправка CTRL+SHIFT+P"""
         return self.send_hotkey_to_obs("CTRL+SHIFT+P")
     
-    def send_ctrl_shift_d(self) -> bool:
-        """Отправка CTRL+SHIFT+D"""
-        return self.send_hotkey_to_obs("CTRL+SHIFT+D")
-    
-    def send_ctrl_shift_h(self) -> bool:
-        """Отправка CTRL+SHIFT+H"""
-        return self.send_hotkey_to_obs("CTRL+SHIFT+H")
-    
-    # Дополнительные методы для других популярных комбинаций
-    def send_ctrl_shift_f(self) -> bool:
-        """Отправка CTRL+SHIFT+F"""
-        return self.send_hotkey_to_obs("CTRL+SHIFT+F")
-    
-    def send_ctrl_shift_g(self) -> bool:
-        """Отправка CTRL+SHIFT+G"""
-        return self.send_hotkey_to_obs("CTRL+SHIFT+G")
-    
     def send_ctrl_shift_r(self) -> bool:
-        """Отправка CTRL+SHIFT+R (для записи)"""
+        """Отправка CTRL+SHIFT+R"""
         return self.send_hotkey_to_obs("CTRL+SHIFT+R")
     
     def send_ctrl_shift_s(self) -> bool:
-        """Отправка CTRL+SHIFT+S (для остановки)"""
+        """Отправка CTRL+SHIFT+S"""
         return self.send_hotkey_to_obs("CTRL+SHIFT+S")
+
+    def send_ctrl_shift_t(self) -> bool:
+        """Отправка CTRL+SHIFT+T"""
+        return self.send_hotkey_to_obs("CTRL+SHIFT+T")
+
+    def send_ctrl_shift_u(self) -> bool:
+        """Отправка CTRL+SHIFT+U"""
+        return self.send_hotkey_to_obs("CTRL+SHIFT+U")
+
+    def send_ctrl_shift_x(self) -> bool:
+        """Отправка CTRL+SHIFT+X"""
+        return self.send_hotkey_to_obs("CTRL+SHIFT+X")
+
+    def send_ctrl_shift_y(self) -> bool:
+        """Отправка CTRL+SHIFT+Y"""
+        return self.send_hotkey_to_obs("CTRL+SHIFT+Y")
 
 def main():
     """Основная функция"""
