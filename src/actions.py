@@ -9,7 +9,7 @@ logger = setup_logger(name="actions", log_file="actions.log")
 def action_altar_and_chorus():
     logger.info("✅ Действие Алтарь + Хор")
     manager = OBSHotkeyManager()
-    manager.send_ctrl_shift_t()
+    manager.send_ctrl_shift_i()
 
 def action_altar_and_chorus_reverb():
     logger.info("✅ Действие Алтарь + Хор (протяжно)")
@@ -39,7 +39,7 @@ def action_reader_remote():
 def action_switch_off_all_mics():
     logger.info("✅ Действие Выключить все микрофоны")
     manager = OBSHotkeyManager()
-    manager.send_ctrl_shift_x()
+    manager.send_ctrl_shift_o()
 
 def action_play_bam():
     """Воспроизводит файл bam.wav"""
