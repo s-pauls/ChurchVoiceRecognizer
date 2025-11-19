@@ -77,6 +77,9 @@ user32.keybd_event.restype = None
 user32.GetWindowThreadProcessId.argtypes = [wintypes.HWND, ctypes.POINTER(wintypes.DWORD)]
 user32.GetWindowThreadProcessId.restype = wintypes.DWORD
 
+user32.IsIconic.argtypes = [wintypes.HWND]
+user32.IsIconic.restype = wintypes.BOOL
+
 
 class OBSHotkeyManager:
     """Класс для управления горячими клавишами OBS"""
@@ -132,9 +135,11 @@ class OBSHotkeyManager:
     def activate_obs_window(self, hwnd: int) -> bool:
         """Активация окна OBS"""
         try:
-            # Восстанавливаем окно если оно свернуто
-            user32.ShowWindow(hwnd, SW_RESTORE)
-            time.sleep(0.1)
+            # Проверяем, свернуто ли окно
+            if user32.IsIconic(hwnd):
+                # Восстанавливаем окно только если оно свернуто
+                user32.ShowWindow(hwnd, SW_RESTORE)
+                time.sleep(0.1)
             
             # Выносим окно на передний план
             result = user32.SetForegroundWindow(hwnd)
@@ -230,10 +235,12 @@ class OBSHotkeyManager:
         
         # Находим последнюю букву в строке (основную клавишу)
         key_code = None
-        for letter in key_map:
-            if f"+{letter}" in hotkey_upper:
-                key_code = key_map[letter]
-                break
+        # Ищем последний символ после знака "+"
+        parts = hotkey_upper.split('+')
+        if parts:
+            last_char = parts[-1]  # Берём последний элемент после разделения по "+"
+            if last_char in key_map:
+                key_code = key_map[last_char]
         
         if key_code is None:
             print(f"Неподдерживаемая комбинация клавиш: {hotkey_string}")
@@ -338,7 +345,7 @@ def main():
         hotkeys = ["CTRL+SHIFT+O", "CTRL+SHIFT+M", "CTRL+SHIFT+A",
                   "CTRL+SHIFT+K", "CTRL+SHIFT+B"]
 
-        hotkeys = ["CTRL+SHIFT+O", "CTRL+SHIFT+A", "CTRL+SHIFT+P",
+        hotkeys = ["CTRL+SHIFT+X", "CTRL+SHIFT+A", "CTRL+SHIFT+P",
                    "CTRL+SHIFT+D", "CTRL+SHIFT+B", "CTRL+SHIFT+H",
                    "CTRL+SHIFT+I"]
 
