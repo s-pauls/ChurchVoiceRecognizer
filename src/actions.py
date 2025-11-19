@@ -6,14 +6,6 @@ from send_keys_to_obs import OBSHotkeyManager
 
 logger = setup_logger(name="actions", log_file="actions.log")
 
-CTRL_SHIFT_X = "^(+(X))"
-CTRL_SHIFT_A = "^(+(A))"
-CTRL_SHIFT_P = "^(+(P))"
-CTRL_SHIFT_D = "^(+(D))"
-CTRL_SHIFT_B = "^(+(B))"
-CTRL_SHIFT_H = "^(+(H))"
-CTRL_SHIFT_T = "^(+(T))"
-
 def action_altar_and_chorus():
     logger.info("✅ Действие Алтарь + Хор")
     manager = OBSHotkeyManager()

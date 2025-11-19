@@ -337,7 +337,11 @@ def main():
         
         hotkeys = ["CTRL+SHIFT+O", "CTRL+SHIFT+M", "CTRL+SHIFT+A",
                   "CTRL+SHIFT+K", "CTRL+SHIFT+B"]
-        
+
+        hotkeys = ["CTRL+SHIFT+X", "CTRL+SHIFT+A", "CTRL+SHIFT+P",
+                   "CTRL+SHIFT+D", "CTRL+SHIFT+B", "CTRL+SHIFT+H",
+                   "CTRL+SHIFT+T", "CTRL+SHIFT+G"]
+
         for hotkey in hotkeys:
             print(f"Отправка {hotkey}...")
             success = manager.send_hotkey_to_obs(hotkey)
